@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Активация{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        Вы не вышли. 
+    {% else %}
+        Вы вышли. Заходите еще.
+    {% endif %}
+{% endblock %}

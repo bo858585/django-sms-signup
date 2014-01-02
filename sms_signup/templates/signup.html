@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        Сначала необходимо выйти.
+    {% else %}
+        <form method="post" action="">{% csrf_token %}
+            <dl>
+                {% for field in form %}
+                    <dt>{{ field.label_tag }}</dt>
+                    <dd>{{ field }}
+                        {% if field.help_text %}<div>{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<div>{{ field.errors }}</div>{% endif %}
+                    </dd>
+                {% endfor %}
+            </dl>
+            <input type="submit" value="Получить sms-код">
+        </form>
+    {% endif %}
+{% endblock %}

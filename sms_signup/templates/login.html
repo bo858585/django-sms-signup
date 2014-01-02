@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        Сначала необходимо выйти.
+    {% else %}
+        <form method="post" action="">{% csrf_token %}
+            <div>
+                {% if form.errors %}
+                    <p class="error">Сожалеем, вы неправильно ввели логин или пароль</p>
+                {% endif %}
+
+                {% for field in form %}
+                    <div>{{ field.label_tag }}</div>
+                    <div>
+                        {{ field }}
+                        {% if field.help_text %}<div>{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<div>{{ field.errors }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="login">Войти</button>
+        </form>
+    {% endif %}
+{% endblock %}

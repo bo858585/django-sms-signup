@@ -1,0 +1,5 @@
+include LICENSE
+include README.rst
+recursive-include sms_signup/static *
+recursive-include sms_signup/templates *
+recursive-include docs *
