@@ -27,7 +27,7 @@ Quick start
 
 https://github.com/bo858585/django-sms-signup/tree/feature/without_tests/sms_signup/templates ,
 
-except base.html, to your project templates folder.
+except base.html, to your project 'templates/sms_signup' folder.
 Your project base.html must have login, logout, signup links and messages viewing as at the example.
 
 3. pip install -r requirements.txt

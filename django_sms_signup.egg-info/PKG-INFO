@@ -31,6 +31,13 @@ Description: =====
             url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}, name='logout'),
             url(r'^login/$',  LoginView.as_view(), name='login'),
         
+        3. Copy templates from
+        
+        https://github.com/bo858585/django-sms-signup/tree/feature/without_tests/sms_signup/templates ,
+        
+        except base.html, to your project 'templates/sms_signup' folder.
+        Your project base.html must have login, logout, signup links and messages viewing as at the example.
+        
         3. pip install -r requirements.txt
         
         4. Run `python manage.py syncdb` to create the sms_signup models.
