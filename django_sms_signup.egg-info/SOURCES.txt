@@ -17,4 +17,6 @@ sms_signup/templates/activation.html
 sms_signup/templates/base.html
 sms_signup/templates/loggedout.html
 sms_signup/templates/login.html
+sms_signup/templates/password_recovery.html
+sms_signup/templates/password_recovery.html~
 sms_signup/templates/signup.html

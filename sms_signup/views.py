@@ -9,9 +9,10 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
+
 from sendsms import api
 
-from .forms import RegistrationForm, ActivationForm, LoginForm
+from .forms import RegistrationForm, ActivationForm, LoginForm, PasswordRecoveryForm
 from .models import ActivationSMSCode
 from .backend import SMSAuthBackend
 
@@ -28,6 +29,8 @@ LOGIN_ERROR = _(u'При входе возникла ошибка')
 SEND_MESSAGE_ERROR = _(u'Ошибка при попытке отправки сообщения')
 ACCOUNT_ACTIVATED = _(u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
 ACTIVATION_PERIOD = 2 # days
+NO_SUCH_USER = _(u"Нет такого пользователя")
+PASSWORD_HAS_BEEN_SENT = _(u"Пароль был отправлен")
 
 
 class RegistrationView(View):
@@ -112,7 +115,7 @@ class ActivationView(View):
             # Compares the db sms code and request sms code
             sms_code_value = form.cleaned_data['sms_code']
             try:
-                worker_sms_code = ActivationSMSCode.objects.get(
+                user_sms_code = ActivationSMSCode.objects.get(
                     sms_code=sms_code_value,
                     phone=phone
                 )
@@ -124,11 +127,11 @@ class ActivationView(View):
                 )
                 return HttpResponseRedirect(reverse("signup_activation"))
 
-            if not worker_sms_code.is_activated:
+            if not user_sms_code.is_activated:
                 # Checks that activation period is not expired
                 signup_time = datetime.datetime.utcnow().replace(
                     tzinfo=utc) - timedelta(days=ACTIVATION_PERIOD)
-                if signup_time < worker_sms_code.sms_code_init_time:
+                if signup_time < user_sms_code.sms_code_init_time:
                     # Creates the user
                     password = User.objects.make_random_password()
                     username = form.cleaned_data['username']
@@ -136,11 +139,11 @@ class ActivationView(View):
                         phone=username,
                         password=password
                     )
-                    worker_sms_code.is_activated = True
-                    worker_sms_code.save()
+                    user_sms_code.is_activated = True
+                    user_sms_code.save()
                     # Sends the password in the sms
                     api.send_sms(
-                        body=" ".join(["Password:", password]),
+                        body=" ".join([u"Пароль:", password]),
                         from_phone=settings.PHONE_NUMBER_FROM,
                         to=[phone],
                         flash=True
@@ -236,3 +239,62 @@ def login(request, username, password):
             LOGIN_ERROR
         )
         return HttpResponseRedirect(reverse("login"))
+
+
+class PasswordRecoveryView(View):
+
+    """
+    Password recovery
+    """
+
+    form_class = PasswordRecoveryForm
+    template_name = 'sms_signup/password_recovery.html'
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(initial={})
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            phone = form.cleaned_data['username']
+            password = User.objects.make_random_password()
+
+            try:
+                u = User.objects.get(username__exact=phone)
+            except:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    NO_SUCH_USER
+                )
+                return HttpResponseRedirect(reverse("forgot_password"))
+
+            u.set_password(password)
+            u.save()
+
+            try:
+                # Sends sms message with the random word
+                api.send_sms(
+                    body=" ".join([u"Новый пароль:", password]),
+                    from_phone=settings.PHONE_NUMBER_FROM,
+                    to=[phone],
+                    flash=True
+                )
+
+            except Exception, e:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    SEND_MESSAGE_ERROR
+                )
+                return HttpResponseRedirect(reverse("forgot_password"))
+
+        messages.add_message(
+            request,
+            messages.INFO,
+            PASSWORD_HAS_BEEN_SENT
+        )
+        return HttpResponseRedirect(reverse("home"))
+
+        return render(request, self.template_name, {'form': form})

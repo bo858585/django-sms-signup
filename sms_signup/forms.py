@@ -18,11 +18,13 @@ PHONE_LABEL = _(u"Номер телефона в международном фо
 PHONE_ERROR = _(
     u"Укажите номер телефона в международном формате (только цифры)")
 USER_ALREADY_EXISTS = _(u"Пользователь с таким телефоном уже зарегистрирован")
+USER_NOT_EXISTS = _(u"Пользователь с таким телефоном не существует")
 WRONG_ACTIVATION_CODE = _(u"Неверный код активации")
 WRONG_PASSWORD = _(u"Неверный пароль")
 INACTIVE_ACCOUNT = _(u"Ваш аккаунт неактивен")
 ACTIVATION_CODE_LABEL = _(u"Код подтверждения регистрации")
 PASSOWRD_LABEL = _(u"Пароль")
+
 
 class RegistrationForm(forms.Form):
 
@@ -166,3 +168,33 @@ class LoginForm(forms.Form):
             raise forms.ValidationError(INACTIVE_ACCOUNT)
         else:
             return self.cleaned_data['password']
+
+
+class PasswordRecoveryForm(forms.Form):
+
+    """
+    Form for password recovery for a user account.
+
+    """
+
+    username = forms.RegexField(
+        regex=PHONE_REGEX,
+        widget=TextInput(),
+        max_length=PHONE_MAX_LENGTH,
+        label=PHONE_LABEL,
+        error_messages={
+            'invalid': PHONE_ERROR,
+        }
+    )
+
+    def clean_username(self):
+        """
+        Validate that the username (phone number) exists
+
+        """
+        existing = User.objects.filter(
+            username__iexact=self.cleaned_data['username'])
+        if not existing.exists():
+            raise forms.ValidationError(USER_NOT_EXISTS)
+        else:
+            return self.cleaned_data['username']

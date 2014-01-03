@@ -17,6 +17,7 @@ Quick start
 
 2. Include the polls URLconf in your project urls.py like this::
 
+    url(r'^$', TemplateView.as_view(template_name="base.html"), name='home'),
     url(r'^signup/', include('sms_signup.urls')),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}, name='logout'),
     url(r'^login/$',  LoginView.as_view(), name='login'),
