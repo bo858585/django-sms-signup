@@ -290,11 +290,10 @@ class PasswordRecoveryView(View):
                 )
                 return HttpResponseRedirect(reverse("forgot_password"))
 
-        messages.add_message(
-            request,
-            messages.INFO,
-            PASSWORD_HAS_BEEN_SENT
-        )
-        return HttpResponseRedirect(reverse("home"))
-
+            messages.add_message(
+                request,
+                messages.INFO,
+                PASSWORD_HAS_BEEN_SENT
+            )
+            return HttpResponseRedirect(reverse("home"))
         return render(request, self.template_name, {'form': form})

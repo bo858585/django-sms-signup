@@ -174,7 +174,6 @@ class PasswordRecoveryForm(forms.Form):
 
     """
     Form for password recovery for a user account.
-
     """
 
     username = forms.RegexField(
@@ -194,6 +193,7 @@ class PasswordRecoveryForm(forms.Form):
         """
         existing = User.objects.filter(
             username__iexact=self.cleaned_data['username'])
+        print existing
         if not existing.exists():
             raise forms.ValidationError(USER_NOT_EXISTS)
         else:
