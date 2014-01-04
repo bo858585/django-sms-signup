@@ -3,8 +3,10 @@
 from django import forms
 from django.forms.widgets import TextInput
 from django.utils.translation import gettext as _
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+
+#from jm_common.users.models import User
+from django.contrib.auth.models import User
 
 from .models import ActivationSMSCode
 
@@ -143,7 +145,7 @@ class LoginForm(forms.Form):
         existing = User.objects.filter(
             username__iexact=self.cleaned_data['username'])
         if not existing.exists():
-            raise forms.ValidationError(USER_ALREADY_EXISTS)
+            raise forms.ValidationError(USER_NOT_EXISTS)
         else:
             return self.cleaned_data['username']
 

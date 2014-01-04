@@ -6,9 +6,10 @@ from django.views.generic.base import View
 from django.contrib import auth, messages
 from django.conf import settings
 from django.utils.translation import ugettext as _
-from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
+#from jm_common.users.models import User
 
 from sendsms import api
 
@@ -185,6 +186,9 @@ class ActivationView(View):
             email=phone
         )
         user.backend = SMSAuthBackend
+#        user.profile_type = 'worker'
+#        user.get_profile_model().phone = phone
+
         user.save()
         return user
 
