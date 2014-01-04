@@ -29,9 +29,9 @@ ACTIVATION_PERIOD_EXPIRED = _(u'Истек период активации')
 LOGIN_ERROR = _(u'При входе возникла ошибка')
 SEND_MESSAGE_ERROR = _(u'Ошибка при попытке отправки сообщения')
 ACCOUNT_ACTIVATED = _(u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
-ACTIVATION_PERIOD = 2 # days
 NO_SUCH_USER = _(u"Нет такого пользователя")
 PASSWORD_HAS_BEEN_SENT = _(u"Пароль был отправлен")
+ACTIVATION_PERIOD = 2  # days
 
 
 class RegistrationView(View):
@@ -55,7 +55,7 @@ class RegistrationView(View):
             random_word = RandomWords()
             sms_code = random_word.random_word()
 
-            # Creates the record with the random 
+            # Creates the record with the random
             # activation word and the phone number
             ActivationSMSCode.objects.create(
                 sms_code=sms_code,
@@ -72,7 +72,7 @@ class RegistrationView(View):
                     to=[phone],
                     flash=True
                 )
-            except Exception, e:
+            except Exception as e:
                 messages.add_message(
                     request,
                     messages.ERROR,
@@ -82,10 +82,10 @@ class RegistrationView(View):
 
             return HttpResponseRedirect(
                 reverse('signup_activation',
-                    kwargs={
-                        'phone': form.cleaned_data['username']
-                    }
-                )
+                        kwargs={
+                            'phone': form.cleaned_data['username']
+                        }
+                        )
             )
 
         return render(request, self.template_name, {'form': form})
@@ -286,7 +286,7 @@ class PasswordRecoveryView(View):
                     flash=True
                 )
 
-            except Exception, e:
+            except Exception as e:
                 messages.add_message(
                     request,
                     messages.ERROR,

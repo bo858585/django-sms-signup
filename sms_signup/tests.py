@@ -7,6 +7,7 @@ when you run "manage.py test".
 
 from django.core.urlresolvers import reverse
 from django.utils.timezone import utc
+from django.utils.translation import ugettext as _
 from django.test import TestCase
 
 from .models import ActivationSMSCode
@@ -14,6 +15,18 @@ from .models import ActivationSMSCode
 import datetime
 
 from random_words import RandomWords
+
+
+INPUT = _(u"Войти")
+REGISTRATION = _(u"Регистрация")
+PASSWORD_RECOVERY = _(u"Восстановление пароля")
+PHONE_INTERNATIONAL_FORMAT =\
+    _(u"Номер телефона в международном формате")
+RECEIVE_SMS_CODE = _(u"Получить sms-код")
+REGISTRATION_CONFIRM_CODE = _(u"Код подтверждения регистрации")
+ACTIVATE = _(u"Активировать")
+LOGOUT = _(u"Выйти")
+ACCOUNT_IS_ACTIVE = _(u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
 
 
 class SMSSignupTests(TestCase):
@@ -24,11 +37,13 @@ class SMSSignupTests(TestCase):
         """
         response = self.client.get(reverse('signup'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, u"Войти")
-        self.assertContains(response, u"Регистрация")
-        self.assertContains(response, u"Восстановление пароля")
-        self.assertContains(response, u"Номер телефона в международном формате")
-        self.assertContains(response, u"Получить sms-код")
+        self.assertContains(response, INPUT)
+        self.assertContains(response, REGISTRATION)
+        self.assertContains(response, PASSWORD_RECOVERY)
+        self.assertContains(
+            response,
+            PHONE_INTERNATIONAL_FORMAT)
+        self.assertContains(response, RECEIVE_SMS_CODE)
 
     def test_signup_form_post(self):
         """
@@ -46,18 +61,20 @@ class SMSSignupTests(TestCase):
             reverse('signup_activation', kwargs={"phone": phone_number})
         )
 
-        self.assertContains(response, u"Войти")
-        self.assertContains(response, u"Регистрация")
-        self.assertContains(response, u"Восстановление пароля")
-        self.assertContains(response, u"Номер телефона в международном формате")
+        self.assertContains(response, INPUT)
+        self.assertContains(response, REGISTRATION)
+        self.assertContains(response, PASSWORD_RECOVERY)
+        self.assertContains(
+            response,
+            PHONE_INTERNATIONAL_FORMAT)
         self.assertContains(response, phone_number)
-        self.assertContains(response, u"Код подтверждения регистрации")
-        self.assertContains(response, u"Активировать")
+        self.assertContains(response, REGISTRATION_CONFIRM_CODE)
+        self.assertContains(response, ACTIVATE)
 
     def test_signup_activation_form_post(self):
         """
         Test the redirect and logging in of the signup activation page after submitting the form.
-        
+
         """
 
         phone_number = "777777777777"
@@ -71,7 +88,7 @@ class SMSSignupTests(TestCase):
             sms_code=sms_code,
             phone=phone_number,
             sms_code_init_time=datetime.datetime.utcnow().replace(
-                    tzinfo=utc),
+                tzinfo=utc),
             is_activated=False
         )
         activation_sms_code_record.save()
@@ -88,5 +105,7 @@ class SMSSignupTests(TestCase):
             reverse('home')
         )
 
-        self.assertContains(response, u"Выйти")
-        self.assertContains(response, u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
+        self.assertContains(response, LOGOUT)
+        self.assertContains(
+            response,
+            ACCOUNT_IS_ACTIVE)
