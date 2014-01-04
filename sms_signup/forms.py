@@ -5,8 +5,8 @@ from django.forms.widgets import TextInput
 from django.utils.translation import gettext as _
 from django.contrib.auth import authenticate
 
-#from jm_common.users.models import User
-from django.contrib.auth.models import User
+from jm_common.users.models import User
+#from django.contrib.auth.models import User
 
 from .models import ActivationSMSCode
 

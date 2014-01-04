@@ -8,8 +8,8 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-#from jm_common.users.models import User
+#from django.contrib.auth.models import User
+from jm_common.users.models import User
 
 from sendsms import api
 
@@ -186,8 +186,8 @@ class ActivationView(View):
             email=phone
         )
         user.backend = SMSAuthBackend
-#        user.profile_type = 'worker'
-#        user.get_profile_model().phone = phone
+        user.profile_type = 'worker'#
+        user.get_profile_model().phone = phone#
 
         user.save()
         return user

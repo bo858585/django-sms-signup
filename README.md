@@ -43,3 +43,19 @@ SENDSMS_BACKEND = 'sendsms.backends.console.SmsBackend'
 6. Run `python manage.py syncdb` to create the sms_signup models.
 
 7. Start the development server and visit http://127.0.0.1:8000/signup/
+
+8. For a testing create settings_test.py::
+```python
+from .settings import *
+
+SKIP_SOUTH_TESTS = True
+SOUTH_TESTS_MIGRATE = False
+
+inst = list(INSTALLED_APPS)
+inst.remove('south')
+INSTALLED_APPS = tuple(inst)
+```
+Then test application:
+```python
+pythonmanagepy test sms_signup --settings=project.settings_test
+```
