@@ -11,6 +11,8 @@ Quick start
 ```python
 INSTALLED_APPS = (
     ...
+
+    'sendsms',
     'sms_signup',
 )
 ```
@@ -32,6 +34,12 @@ except base.html, to your project 'templates/sms_signup' folder.
 Your project base.html must have login, logout, signup links and messages output like at the example.
 4. `pip install -r requirements.txt`
 
-5. Run `python manage.py syncdb` to create the sms_signup models.
+5. Add lines to setting_local:: 
+```python
+PHONE_NUMBER_FROM = "+380974657365" # test
+SENDSMS_BACKEND = 'sendsms.backends.console.SmsBackend'
+```
 
-6. Start the development server and visit http://127.0.0.1:8000/signup/
+6. Run `python manage.py syncdb` to create the sms_signup models.
+
+7. Start the development server and visit http://127.0.0.1:8000/signup/

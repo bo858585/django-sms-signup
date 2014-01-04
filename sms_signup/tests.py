@@ -3,67 +3,90 @@
 """
 This file demonstrates writing tests using the unittest module. These will pass
 when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
 """
 
-from django_webtest import WebTest
-from .models import WorkerSMSCode
 from django.core.urlresolvers import reverse
-import datetime
 from django.utils.timezone import utc
+from django.test import TestCase
+
+from .models import ActivationSMSCode
+
+import datetime
+
+from random_words import RandomWords
 
 
-from random import randint
+class SMSSignupTests(TestCase):
 
+    def test_signup_form_get(self):
+        """
+        Test the appearing of the signup page
+        """
+        response = self.client.get(reverse('signup'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, u"Войти")
+        self.assertContains(response, u"Регистрация")
+        self.assertContains(response, u"Восстановление пароля")
+        self.assertContains(response, u"Номер телефона в международном формате")
+        self.assertContains(response, u"Получить sms-код")
 
-class SignupTestCase(WebTest):
-    csrf_checks = False
-    extra_environ = {'HTTP_ACCEPT_LANGUAGE': 'ru'}
+    def test_signup_form_post(self):
+        """
+        Test the redirect of the signup page after submitting the form
+        """
+        phone_number = "666666666666"
 
-    def test_signup(self):
-        test_sms_code = "test_sms_code"
-        test_phone = randint(10000000000, 99999999999999)
-        worker_sms_code = WorkerSMSCode(
-            sms_code=test_sms_code,
-            phone=test_phone,
-            sms_code_init_time=datetime.datetime.utcnow().replace(tzinfo=utc),
-            is_activated=True
+        response = self.client.post(
+            reverse('signup'),
+            {'username': phone_number},
+            follow=True
         )
-        worker_sms_code.save()
+        self.assertRedirects(
+            response,
+            reverse('signup_activation', kwargs={"phone": phone_number})
+        )
 
-        url = reverse('signup')
-        res = self.app.post(url, { "username": test_phone }, expect_errors=True)
-        print res.context
-        self.assertEquals(res.status_code, 200, 'Request for added leader was passet')
-#        self.assertEquals(
- #           worker_sms_code,
-  #          WorkerSMSCode.objects.get(pk=worker_sms_code.pk),
-   #         'Paid to date was changed'
-    #    )
-        print res
+        self.assertContains(response, u"Войти")
+        self.assertContains(response, u"Регистрация")
+        self.assertContains(response, u"Восстановление пароля")
+        self.assertContains(response, u"Номер телефона в международном формате")
+        self.assertContains(response, phone_number)
+        self.assertContains(response, u"Код подтверждения регистрации")
+        self.assertContains(response, u"Активировать")
 
-    def test_labels_existing_at_worker_signup(self):
-        signup = self.app.get('/signup/')
-        assert u'Номер телефона в международном формате' in signup
-        assert u'Получить sms-код' in signup
+    def test_signup_activation_form_post(self):
+        """
+        Test the redirect and logging in of the signup activation page after submitting the form.
+        
+        """
 
-    def test_labels_existing_at_worker_signup_activation(self):
-        username = randint(10000000000, 99999999999999)
-        signup = self.app.get('/signup/activation/{}/'.format(username))
-        assert u'Номер телефона в международном формате' in signup
-        assert u'Код подтверждения регистрации' in signup
+        phone_number = "777777777777"
 
-    def test_signupl(self):
-        form = self.app.get('/signup/').form
-        username = randint(10000000000, 99999999999999)
-        form['username'] = username
-        print form
-        response = form.submit().follow()
-        print response.context
-        self.assertEqual(response.context['username'].username, username)
-        print response.context
-        print response.template
+        # Genarates the random word for the sms code
+        random_word = RandomWords()
+        sms_code = random_word.random_word()
 
+        # Create record with the random word at the db
+        activation_sms_code_record = ActivationSMSCode.objects.create(
+            sms_code=sms_code,
+            phone=phone_number,
+            sms_code_init_time=datetime.datetime.utcnow().replace(
+                    tzinfo=utc),
+            is_activated=False
+        )
+        activation_sms_code_record.save()
 
+        # Send activation request and check entrance
+        response = self.client.post(
+            reverse('signup_activation', kwargs={"phone": phone_number}),
+            {"username": phone_number, "sms_code": sms_code},
+            follow=True
+        )
 
+        self.assertRedirects(
+            response,
+            reverse('home')
+        )
+
+        self.assertContains(response, u"Выйти")
+        self.assertContains(response, u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
