@@ -47,10 +47,8 @@ SENDSMS_BACKEND = 'sendsms.backends.console.SmsBackend'
 8. For a testing create settings_test.py::
 ```python
 from .settings import *
-
 SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False
-
 inst = list(INSTALLED_APPS)
 inst.remove('south')
 INSTALLED_APPS = tuple(inst)
