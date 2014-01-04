@@ -44,7 +44,7 @@ SENDSMS_BACKEND = 'sendsms.backends.console.SmsBackend'
 
 7. Start the development server and visit http://127.0.0.1:8000/signup/
 
-8. For a testing create settings_test.py::
+8. For a testing create settings_test.py:
 ```python
 from .settings import *
 SKIP_SOUTH_TESTS = True
@@ -57,3 +57,6 @@ Then test application:
 ```python
 pythonmanagepy test sms_signup --settings=project.settings_test
 ```
+
+9. django-sms-signup use sendsms app for testing purpuses only -
+simple console testing.
