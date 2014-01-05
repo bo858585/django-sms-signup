@@ -7,7 +7,13 @@ activation through sms without using an email.
 Quick start
 -----------
 
-1. Add "sms_signup" to your INSTALLED_APPS setting like this::
+1. `cd to your project apps directory`
+
+2. `git clone git@github.com:bo858585/django-sms-signup.git`
+
+3. `pip install django-sms-signup/dist/django-sms-signup-0.1.tar.gz`
+
+4. Add "sms_signup" to your INSTALLED_APPS setting like here::
 ```python
 INSTALLED_APPS = (
     ...
@@ -17,7 +23,7 @@ INSTALLED_APPS = (
 )
 ```
 
-2. Include the URLconf in your project urls.py like this::
+2. Include the URLconf in your project urls.py like here::
 ```python
 url(r'^$', TemplateView.as_view(template_name="base.html"), name='home'),
 url(r'^signup/', include('sms_signup.urls')),
@@ -26,12 +32,12 @@ url(r'^login/$',  LoginView.as_view(), name='login'),
 url(r'^forgot_password/$',  PasswordRecoveryView.as_view(), name='forgot_password'),
 url(r'^password_sent/$',  TemplateView.as_view(template_name = "password_sent.html"), name='password_sent'),
 ```
-Parameters "name" of the base template must be exact in this example.
+Parameters "name" of the base.html template must be exact as in this example.
 
 3. Copy templates from
 https://github.com/bo858585/django-sms-signup/tree/feature/without_tests/sms_signup/templates ,
-except base.html, to your project 'templates/sms_signup' folder.
-Your project base.html must have login, logout, signup links and messages output like at the example.
+except base.html, to your project 'templates/sms_signup' folder. Your project base.html must have login, logout, signup links and messages output like at this example.
+
 4. `pip install -r requirements.txt`
 
 5. Add lines to setting_local:: 
