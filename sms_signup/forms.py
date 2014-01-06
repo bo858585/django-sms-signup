@@ -3,10 +3,7 @@
 from django import forms
 from django.forms.widgets import TextInput
 from django.utils.translation import gettext as _
-from django.contrib.auth import authenticate
-
-from jm_common.users.models import User
-#from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model
 
 from .models import ActivationSMSCode
 
@@ -26,6 +23,8 @@ WRONG_PASSWORD = _(u"Неверный пароль")
 INACTIVE_ACCOUNT = _(u"Ваш аккаунт неактивен")
 ACTIVATION_CODE_LABEL = _(u"Код подтверждения регистрации")
 PASSOWRD_LABEL = _(u"Пароль")
+
+User = get_user_model()
 
 
 class RegistrationForm(forms.Form):

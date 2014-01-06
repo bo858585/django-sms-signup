@@ -8,16 +8,15 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
-#from django.contrib.auth.models import User
-from jm_common.users.models import User
-
-from sendsms import api
+from django.contrib.auth import get_user_model
 
 from .forms import RegistrationForm, ActivationForm, LoginForm, PasswordRecoveryForm
 from .models import ActivationSMSCode
 from .backend import SMSAuthBackend
 
 from random_words import RandomWords
+
+from sendsms import api
 
 import datetime
 from datetime import timedelta
@@ -32,6 +31,21 @@ ACCOUNT_ACTIVATED = _(u"Ваш аккаунт был активирован. С�
 NO_SUCH_USER = _(u"Нет такого пользователя")
 PASSWORD_HAS_BEEN_SENT = _(u"Пароль был отправлен")
 ACTIVATION_PERIOD = 2  # days
+
+User = get_user_model()
+
+
+def redirect_with_message(request, message_type, message_text, redirect_page):
+    """
+    Redirects to the page and shows the message
+    """
+
+    messages.add_message(
+        request,
+        message_type,
+        message_text
+    )
+    return HttpResponseRedirect(reverse(redirect_page))
 
 
 class RegistrationView(View):
@@ -73,12 +87,12 @@ class RegistrationView(View):
                     flash=True
                 )
             except Exception as e:
-                messages.add_message(
+                return redirect_with_message(
                     request,
                     messages.ERROR,
-                    SEND_MESSAGE_ERROR
+                    SEND_MESSAGE_ERROR,
+                    "signup"
                 )
-                return HttpResponseRedirect(reverse("signup"))
 
             return HttpResponseRedirect(
                 reverse('signup_activation',
@@ -121,12 +135,12 @@ class ActivationView(View):
                     phone=phone
                 )
             except ActivationSMSCode.DoesNotExist:
-                messages.add_message(
+                return redirect_with_message(
                     request,
                     messages.ERROR,
-                    WRONG_ACTIVATION_CODE
+                    WRONG_ACTIVATION_CODE,
+                    "signup_activation"
                 )
-                return HttpResponseRedirect(reverse("signup_activation"))
 
             if not user_sms_code.is_activated:
                 # Checks that activation period is not expired
@@ -159,19 +173,19 @@ class ActivationView(View):
                     # Authenticates the user
                     return login(request, username, password)
                 else:
-                    messages.add_message(
+                    return redirect_with_message(
                         request,
                         messages.ERROR,
-                        ACTIVATION_PERIOD_EXPIRED
+                        ACTIVATION_PERIOD_EXPIRED,
+                        "signup"
                     )
-                    HttpResponseRedirect(reverse("signup"))
             else:
-                messages.add_message(
+                return redirect_with_message(
                     request,
                     messages.ERROR,
-                    ACTIVATION_ALREADY_HAS_BEEN
+                    ACTIVATION_ALREADY_HAS_BEEN,
+                    "signup"
                 )
-                return HttpResponseRedirect(reverse("signup"))
 
         return render(request, self.template_name, {'form': form})
 
@@ -237,12 +251,12 @@ def login(request, username, password):
         auth.login(request, user)
         return HttpResponseRedirect(reverse("home"))
     else:
-        messages.add_message(
+        return redirect_with_message(
             request,
             messages.ERROR,
-            LOGIN_ERROR
+            LOGIN_ERROR,
+            "login"
         )
-        return HttpResponseRedirect(reverse("login"))
 
 
 class PasswordRecoveryView(View):
@@ -267,12 +281,12 @@ class PasswordRecoveryView(View):
             try:
                 u = User.objects.get(username__exact=phone)
             except:
-                messages.add_message(
+                return redirect_with_message(
                     request,
                     messages.ERROR,
-                    NO_SUCH_USER
+                    NO_SUCH_USER,
+                    "forgot_password"
                 )
-                return HttpResponseRedirect(reverse("forgot_password"))
 
             u.set_password(password)
             u.save()
@@ -287,17 +301,17 @@ class PasswordRecoveryView(View):
                 )
 
             except Exception as e:
-                messages.add_message(
+                return redirect_with_message(
                     request,
                     messages.ERROR,
-                    SEND_MESSAGE_ERROR
+                    SEND_MESSAGE_ERROR,
+                    "forgot_password"
                 )
-                return HttpResponseRedirect(reverse("forgot_password"))
 
-            messages.add_message(
+            return redirect_with_message(
                 request,
                 messages.INFO,
-                PASSWORD_HAS_BEEN_SENT
+                PASSWORD_HAS_BEEN_SENT,
+                "home"
             )
-            return HttpResponseRedirect(reverse("home"))
         return render(request, self.template_name, {'form': form})
