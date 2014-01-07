@@ -21,10 +21,10 @@ from sendsms import api
 import datetime
 from datetime import timedelta
 
-from smsaero.utils import send_sms_async
-from smsaero.utils import get_sms_status_async
-from smsaero.utils import get_balance_async
-from smsaero.utils import get_signatures_name_async
+from smsaero.utils import send_sms
+from smsaero.utils import get_sms_status
+from smsaero.utils import get_balance
+from smsaero.utils import get_signatures_name
 from smsaero.models import SMSMessage
 
 ACTIVATION_ALREADY_HAS_BEEN = _(u'Активация уже производилась')
@@ -84,9 +84,9 @@ class RegistrationView(View):
             )
 
             try:
-                print sms_code
+                print sms_code, phone
                 # Sends sms message with the random word
-                send_sms_async(phone, sms_code)
+                send_sms(phone, sms_code)
             except Exception as e:
                 return redirect_with_message(
                     request,
@@ -140,7 +140,7 @@ class ActivationView(View):
                     request,
                     messages.ERROR,
                     WRONG_ACTIVATION_CODE,
-                    "signup_activation"
+                    "signup"
                 )
 
             if not user_sms_code.is_activated:
@@ -157,12 +157,19 @@ class ActivationView(View):
                     )
                     user_sms_code.is_activated = True
                     user_sms_code.save()
-                    print " ".join([u"Пароль:", password])
+                    print password, username
                     # Sends the password in the sms
-                    send_sms_async(
-                        username,
-                        " ".join([u"Пароль:", password])
-                    )
+                    try:
+                        send_sms(username, password)
+                    except Exception as e:
+                        print str(e)
+                        return redirect_with_message(
+                            request,
+                            messages.ERROR,
+                            SEND_MESSAGE_ERROR,
+                            "signup"
+                        )
+
                     messages.add_message(
                         request,
                         messages.INFO,
@@ -293,12 +300,9 @@ class PasswordRecoveryView(View):
             u.save()
 
             try:
-                print u" ".join([u"Новый пароль:", password])
+                print password, phone
                 # Sends sms message with the random word
-                send_sms_async(
-                    phone,
-                    " ".join([u"Новый пароль:", password])
-                )
+                send_sms(phone, password)
             except Exception as e:
                 return redirect_with_message(
                     request,
