@@ -21,6 +21,11 @@ from sendsms import api
 import datetime
 from datetime import timedelta
 
+from smsaero.utils import send_sms_async
+from smsaero.utils import get_sms_status_async
+from smsaero.utils import get_balance_async
+from smsaero.utils import get_signatures_name_async
+from smsaero.models import SMSMessage
 
 ACTIVATION_ALREADY_HAS_BEEN = _(u'Активация уже производилась')
 WRONG_ACTIVATION_CODE = _(u'Неверный код активации')
@@ -79,13 +84,9 @@ class RegistrationView(View):
             )
 
             try:
+                print sms_code
                 # Sends sms message with the random word
-                api.send_sms(
-                    body=sms_code,
-                    from_phone=settings.PHONE_NUMBER_FROM,
-                    to=[phone],
-                    flash=True
-                )
+                send_sms_async(phone, sms_code)
             except Exception as e:
                 return redirect_with_message(
                     request,
@@ -156,14 +157,12 @@ class ActivationView(View):
                     )
                     user_sms_code.is_activated = True
                     user_sms_code.save()
+                    print " ".join([u"Пароль:", password])
                     # Sends the password in the sms
-                    api.send_sms(
-                        body=" ".join([u"Пароль:", password]),
-                        from_phone=settings.PHONE_NUMBER_FROM,
-                        to=[phone],
-                        flash=True
+                    send_sms_async(
+                        username,
+                        " ".join([u"Пароль:", password])
                     )
-
                     messages.add_message(
                         request,
                         messages.INFO,
@@ -193,7 +192,9 @@ class ActivationView(View):
         """
         Creating the user
         """
-
+        # email=phone, because
+        # User._meta.get_field('email')._unique = True at common
+        # need to remove later
         user = User.objects.create_user(
             username=phone,
             password=password,
@@ -292,14 +293,12 @@ class PasswordRecoveryView(View):
             u.save()
 
             try:
+                print u" ".join([u"Новый пароль:", password])
                 # Sends sms message with the random word
-                api.send_sms(
-                    body=" ".join([u"Новый пароль:", password]),
-                    from_phone=settings.PHONE_NUMBER_FROM,
-                    to=[phone],
-                    flash=True
+                send_sms_async(
+                    phone,
+                    " ".join([u"Новый пароль:", password])
                 )
-
             except Exception as e:
                 return redirect_with_message(
                     request,

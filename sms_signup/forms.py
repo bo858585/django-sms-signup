@@ -8,9 +8,9 @@ from django.contrib.auth import authenticate, get_user_model
 from .models import ActivationSMSCode
 
 
-PHONE_REGEX = r'^[\d]{11,14}$'
+PHONE_REGEX = r'^[\d]{10}$'
 
-PHONE_MAX_LENGTH = 14
+PHONE_MAX_LENGTH = 10
 ACTIVATION_CODE_MAX_LENGTH = 30
 
 PHONE_LABEL = _(u"Номер телефона в международном формате")
