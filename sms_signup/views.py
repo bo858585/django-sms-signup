@@ -15,7 +15,6 @@ from .backend import SMSAuthBackend
 
 from random_words import RandomWords
 
-
 import datetime
 from datetime import timedelta
 
@@ -154,7 +153,8 @@ class ActivationView(View):
                     print password, username
                     # Sends the password in the sms
                     try:
-                        send_sms_async(username, password)
+                        s = send_sms_async(username, password)
+                        print s
                     except Exception as e:
                         print str(e)
                         return redirect_with_message(

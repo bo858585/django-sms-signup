@@ -30,11 +30,18 @@ ACCOUNT_IS_ACTIVE = _(u"Ваш аккаунт был активирован. С�
 
 
 class SMSSignupTests(TestCase):
+    """
+    @phone_number must be real number
+    """
+
+    def setUp(self):
+        self.phone_number = "79215836781"
 
     def test_signup_form_get(self):
         """
         Test the appearing of the signup page
         """
+
         response = self.client.get(reverse('signup'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, INPUT)
@@ -49,16 +56,15 @@ class SMSSignupTests(TestCase):
         """
         Test the redirect of the signup page after submitting the form
         """
-        phone_number = "666666666666"
 
         response = self.client.post(
             reverse('signup'),
-            {'username': phone_number},
+            {'username': self.phone_number},
             follow=True
         )
         self.assertRedirects(
             response,
-            reverse('signup_activation', kwargs={"phone": phone_number})
+            reverse('signup_activation', kwargs={"phone": self.phone_number})
         )
 
         self.assertContains(response, INPUT)
@@ -67,17 +73,16 @@ class SMSSignupTests(TestCase):
         self.assertContains(
             response,
             PHONE_INTERNATIONAL_FORMAT)
-        self.assertContains(response, phone_number)
+        self.assertContains(response, self.phone_number)
         self.assertContains(response, REGISTRATION_CONFIRM_CODE)
         self.assertContains(response, ACTIVATE)
 
     def test_signup_activation_form_post(self):
         """
-        Test the redirect and logging in of the signup activation page after submitting the form.
+        Test the redirect and logging in of the signup
+        activation page after submitting the form.
 
         """
-
-        phone_number = "777777777777"
 
         # Genarates the random word for the sms code
         random_word = RandomWords()
@@ -86,7 +91,7 @@ class SMSSignupTests(TestCase):
         # Create record with the random word at the db
         activation_sms_code_record = ActivationSMSCode.objects.create(
             sms_code=sms_code,
-            phone=phone_number,
+            phone=self.phone_number,
             sms_code_init_time=datetime.datetime.utcnow().replace(
                 tzinfo=utc),
             is_activated=False
@@ -95,8 +100,8 @@ class SMSSignupTests(TestCase):
 
         # Send activation request and check entrance
         response = self.client.post(
-            reverse('signup_activation', kwargs={"phone": phone_number}),
-            {"username": phone_number, "sms_code": sms_code},
+            reverse('signup_activation', kwargs={"phone": self.phone_number}),
+            {"username": self.phone_number, "sms_code": sms_code},
             follow=True
         )
 
