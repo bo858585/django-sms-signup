@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.contrib import auth, messages
-from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
@@ -16,16 +15,11 @@ from .backend import SMSAuthBackend
 
 from random_words import RandomWords
 
-from sendsms import api
 
 import datetime
 from datetime import timedelta
 
-from smsaero.utils import send_sms
-from smsaero.utils import get_sms_status
-from smsaero.utils import get_balance
-from smsaero.utils import get_signatures_name
-from smsaero.models import SMSMessage
+from smsaero.utils import send_sms_async
 
 ACTIVATION_ALREADY_HAS_BEEN = _(u'Активация уже производилась')
 WRONG_ACTIVATION_CODE = _(u'Неверный код активации')
@@ -86,8 +80,8 @@ class RegistrationView(View):
             try:
                 print sms_code, phone
                 # Sends sms message with the random word
-                send_sms(phone, sms_code)
-            except Exception as e:
+                send_sms_async(phone, sms_code)
+            except Exception:
                 return redirect_with_message(
                     request,
                     messages.ERROR,
@@ -160,7 +154,7 @@ class ActivationView(View):
                     print password, username
                     # Sends the password in the sms
                     try:
-                        send_sms(username, password)
+                        send_sms_async(username, password)
                     except Exception as e:
                         print str(e)
                         return redirect_with_message(
@@ -302,8 +296,8 @@ class PasswordRecoveryView(View):
             try:
                 print password, phone
                 # Sends sms message with the random word
-                send_sms(phone, password)
-            except Exception as e:
+                send_sms_async(phone, password)
+            except Exception:
                 return redirect_with_message(
                     request,
                     messages.ERROR,
