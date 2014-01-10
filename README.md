@@ -9,9 +9,9 @@ Quick start
 
 1. Install https://github.com/DrMartiner/django-smsaero
 
-2. At /admin/smsaero/ add signature "REKLAMA" to "Подписи сообщений" or get it with instructions here http://smsaero.ru/api/
+2. At /admin/smsaero/ add signature "REKLAMA" to "Подписи сообщений" or get signature using man: http://smsaero.ru/api/
 
-3. `cd to your project apps directory`
+3. `cd to your apps directory`
 
 4. `git clone git@github.com:bo858585/django-sms-signup.git`
 
@@ -33,7 +33,7 @@ url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}, name='
 url(r'^login/$',  LoginView.as_view(), name='login'),
 url(r'^forgot_password/$',  PasswordRecoveryView.as_view(), name='forgot_password'),
 ```
-Parameters "name" of the base.html template must be exact as in this example.
+Parameter "name" of base.html template must be exact as in this example.
 
 8. Copy templates from
 https://github.com/bo858585/django-sms-signup/tree/feature/without_tests/sms_signup/templates ,
