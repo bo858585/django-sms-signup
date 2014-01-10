@@ -9,7 +9,7 @@ from django.utils.translation import ugettext as _
 from django.test import TestCase
 
 from .models import ActivationSMSCode
-
+from .views import ACCOUNT_ACTIVATED
 
 INPUT = _(u"Войти")
 REGISTRATION = _(u"Регистрация")
@@ -20,7 +20,6 @@ RECEIVE_SMS_CODE = _(u"Получить sms-код")
 REGISTRATION_CONFIRM_CODE = _(u"Код подтверждения регистрации")
 ACTIVATE = _(u"Активировать")
 LOGOUT = _(u"Выйти")
-ACCOUNT_IS_ACTIVE = _(u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
 
 
 class SMSSignupTests(TestCase):
@@ -29,7 +28,7 @@ class SMSSignupTests(TestCase):
     """
 
     def setUp(self):
-        self.phone_number = "79215836781"
+        self.phone_number = "+79110915701"
 
     def test_signup_form_get(self):
         """
@@ -107,4 +106,4 @@ class SMSSignupTests(TestCase):
         self.assertContains(response, LOGOUT)
         self.assertContains(
             response,
-            ACCOUNT_IS_ACTIVE)
+            ACCOUNT_ACTIVATED)
