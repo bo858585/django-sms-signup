@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+from datetime import timedelta
+from random_words import RandomWords
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import View
@@ -9,23 +13,19 @@ from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
+from smsaero.utils import send_sms_async
+
 from .forms import RegistrationForm, ActivationForm, LoginForm, PasswordRecoveryForm
 from .models import ActivationSMSCode
 from .backend import SMSAuthBackend
 
-from random_words import RandomWords
-
-import datetime
-from datetime import timedelta
-
-from smsaero.utils import send_sms_async
 
 ACTIVATION_ALREADY_HAS_BEEN = _(u'Активация уже производилась')
 WRONG_ACTIVATION_CODE = _(u'Неверный код активации')
 ACTIVATION_PERIOD_EXPIRED = _(u'Истек период активации')
 LOGIN_ERROR = _(u'При входе возникла ошибка')
 SEND_MESSAGE_ERROR = _(u'Ошибка при попытке отправки сообщения')
-ACCOUNT_ACTIVATED = _(u"Ваш аккаунт был активирован. Спасибо, за регистрацию")
+ACCOUNT_ACTIVATED = _(u"Ваш аккаунт был активирован. Пароль выслан в смс-сообщении. Спасибо, за регистрацию.")
 NO_SUCH_USER = _(u"Нет такого пользователя")
 PASSWORD_HAS_BEEN_SENT = _(u"Пароль был отправлен")
 ACTIVATION_PERIOD = 2  # days
@@ -47,7 +47,6 @@ def redirect_with_message(request, message_type, message_text, redirect_page):
 
 
 class RegistrationView(View):
-
     """
     User registration
     """
@@ -77,9 +76,10 @@ class RegistrationView(View):
             )
 
             try:
-                print sms_code, phone
+                print phone, sms_code
                 # Sends sms message with the random word
-                send_sms_async(phone, sms_code)
+                status = send_sms_async(phone, sms_code)
+                print status
             except Exception:
                 return redirect_with_message(
                     request,
@@ -133,7 +133,8 @@ class ActivationView(View):
                     request,
                     messages.ERROR,
                     WRONG_ACTIVATION_CODE,
-                    "signup"
+                    "signup_activation",
+                    { 'phone': phone }
                 )
 
             if not user_sms_code.is_activated:
@@ -150,18 +151,18 @@ class ActivationView(View):
                     )
                     user_sms_code.is_activated = True
                     user_sms_code.save()
-                    print password, username
                     # Sends the password in the sms
                     try:
+                        print username, password
                         s = send_sms_async(username, password)
                         print s
                     except Exception as e:
-                        print str(e)
                         return redirect_with_message(
                             request,
                             messages.ERROR,
                             SEND_MESSAGE_ERROR,
-                            "signup"
+                            "signup_activation",
+                            { 'phone': phone }
                         )
 
                     messages.add_message(
@@ -193,24 +194,18 @@ class ActivationView(View):
         """
         Creating the user
         """
-        # email=phone, because
-        # User._meta.get_field('email')._unique = True at common
-        # need to remove later
+
         user = User.objects.create_user(
             username=phone,
             password=password,
             email=phone
         )
         user.backend = SMSAuthBackend
-        user.profile_type = 'worker'#
-        user.get_profile_model().phone = phone#
-
         user.save()
         return user
 
 
 class LoginView(View):
-
     """
     User login
     """
@@ -294,9 +289,10 @@ class PasswordRecoveryView(View):
             u.save()
 
             try:
-                print password, phone
+                print phone, password
                 # Sends sms message with the random word
-                send_sms_async(phone, password)
+                s = send_sms_async(phone, password)
+                print s
             except Exception:
                 return redirect_with_message(
                     request,

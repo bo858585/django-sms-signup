@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-"""
+import datetime
+from random_words import RandomWords
 
 from django.core.urlresolvers import reverse
 from django.utils.timezone import utc
@@ -11,10 +9,6 @@ from django.utils.translation import ugettext as _
 from django.test import TestCase
 
 from .models import ActivationSMSCode
-
-import datetime
-
-from random_words import RandomWords
 
 
 INPUT = _(u"Войти")

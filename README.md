@@ -32,7 +32,6 @@ url(r'^signup/', include('sms_signup.urls')),
 url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}, name='logout'),
 url(r'^login/$',  LoginView.as_view(), name='login'),
 url(r'^forgot_password/$',  PasswordRecoveryView.as_view(), name='forgot_password'),
-url(r'^password_sent/$',  TemplateView.as_view(template_name = "password_sent.html"), name='password_sent'),
 ```
 Parameters "name" of the base.html template must be exact as in this example.
 
@@ -55,5 +54,5 @@ INSTALLED_APPS = tuple(inst)
 ```
 Then test application:
 ```python
-pythonmanagepy test sms_signup --settings=project.settings_test
+pythonmanagepy test sms_signup.SMSSignupTests --settings=signup_project.settings_test
 ```

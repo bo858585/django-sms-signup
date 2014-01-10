@@ -8,14 +8,15 @@ from django.contrib.auth import authenticate, get_user_model
 from .models import ActivationSMSCode
 
 
-PHONE_REGEX = r'^[\d]{11,12}$'
+REGEX = r'\+\d{11}'
+PHONE_REGEX = "".join([r'^', REGEX, r'$'])
 
 PHONE_MAX_LENGTH = 12
 ACTIVATION_CODE_MAX_LENGTH = 30
 
-PHONE_LABEL = _(u"Номер телефона в международном формате")
+PHONE_LABEL = _(u"Номер телефона в международном формате +7XXXXXXXXXX")
 PHONE_ERROR = _(
-    u"Укажите номер телефона в международном формате (только цифры)")
+    u"Укажите номер телефона в международном формате +7XXXXXXXXXX")
 USER_ALREADY_EXISTS = _(u"Пользователь с таким телефоном уже зарегистрирован")
 USER_NOT_EXISTS = _(u"Пользователь с таким телефоном не существует")
 WRONG_ACTIVATION_CODE = _(u"Неверный код активации")
@@ -61,7 +62,6 @@ class RegistrationForm(forms.Form):
 
 
 class ActivationForm(forms.Form):
-
     """
     Registration activation form
     """
@@ -89,7 +89,6 @@ class ActivationForm(forms.Form):
     def clean_username(self):
         """
         Validate that the username (phone) exists
-
         """
         existing = User.objects.filter(
             username__iexact=self.cleaned_data['username'])
@@ -102,7 +101,6 @@ class ActivationForm(forms.Form):
         """
         Validate that the user with the phone and the sms_code
         exists in db
-
         """
         try:
             worker_sms_code = ActivationSMSCode.objects.get(
@@ -116,7 +114,6 @@ class ActivationForm(forms.Form):
 
 
 class LoginForm(forms.Form):
-
     """
     Registration activation form
     """
@@ -139,8 +136,8 @@ class LoginForm(forms.Form):
     def clean_username(self):
         """
         Validate that the username (phone) exists.
-
         """
+
         existing = User.objects.filter(
             username__iexact=self.cleaned_data['username'])
         if not existing.exists():
@@ -152,7 +149,6 @@ class LoginForm(forms.Form):
         """
         Validate that the username (phone) with
         the password exists and user is active.
-
         """
 
         try:
@@ -172,7 +168,6 @@ class LoginForm(forms.Form):
 
 
 class PasswordRecoveryForm(forms.Form):
-
     """
     Form for password recovery for a user account.
     """
@@ -190,11 +185,11 @@ class PasswordRecoveryForm(forms.Form):
     def clean_username(self):
         """
         Validate that the username (phone number) exists
-
         """
+
         existing = User.objects.filter(
             username__iexact=self.cleaned_data['username'])
-        print existing
+
         if not existing.exists():
             raise forms.ValidationError(USER_NOT_EXISTS)
         else:
